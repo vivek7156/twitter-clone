@@ -1,4 +1,4 @@
-import e from "express";
+import express from "express";
 import { generateTokenAndSetCookie } from "../lib/utils/generateToken.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
@@ -60,30 +60,39 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-	try{
-		const { userName, password } = req.body;
-		const user = await User.findOne({ userName });
-		const isPasswordCorrect = await bcrypt.compare(password, user.password || "");
+    try {
+        const { userName, password } = req.body;
+        const user = await User.findOne({ userName });
 
-		if(!user || !isPasswordCorrect) {
-			return res.status(400).json({ error: "Invalid credentials" });
-		}
-		generateTokenAndSetCookie(user._id, res);
-		res.status(200).json({
-			_id: user._id,
-			fullName: user.fullName,
-			userName: user.userName,
-			email: user.email,
-			followers: user.followers,
-			following: user.following,
-			profileImg: user.profileImg,
-			coverImg: user.coverImg,
-		});
-	} catch(error) {
-		console.log("Error in login controller", error.message);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
-}
+        // Check if the user exists
+        if (!user) {
+            return res.status(400).json({ error: "Invalid credentials" });
+        }
+
+        // Check if the password is correct
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ error: "Invalid credentials" });
+        }
+
+        // If authentication is successful, generate the token and send the response
+        generateTokenAndSetCookie(user._id, res);
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            userName: user.userName,
+            email: user.email,
+            followers: user.followers,
+            following: user.following,
+            profileImg: user.profileImg,
+            coverImg: user.coverImg,
+        });
+    } catch (error) {
+        console.log("Error in login controller", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 
 export const logout = async (req, res) => {
 	try {
