@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 
 export const signup = async (req, res) => {
 	try {
+		console.log("Request body:", req.body);
 		const { fullName, userName, email, password } = req.body;
         console.log("Email received:", email);
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
