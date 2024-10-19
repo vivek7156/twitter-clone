@@ -6,28 +6,29 @@ import { v2 as cloudinary } from "cloudinary";
 export const createPost = async (req, res) => {
     try {
         const { text } = req.body;
-        let { image } = req.body;
+        let { img } = req.body;
         const userId = req.user._id.toString();
 
         const user = await User.findById(userId);
         if(!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        if(!text && !image) {
+        if(!text && !img) {
             return res.status(400).json({ error: "Text or image is required" });
         }
-        if(image) {
-            const uploadedResponse = await cloudinary.uploader.upload(image);
-            image = uploadedResponse.url;
+        if(img) {
+            const uploadedResponse = await cloudinary.uploader.upload(img);
+            img = uploadedResponse.url;
         }
 
         const newPost = new Post({
             user: userId,
             text,
-            image,
+            img,
         });
 
-        newPost.save(); 
+        await newPost.save(); 
+        console.log("Created post:", newPost);
         return res.status(201).json(newPost);
     } catch (error) {
         res.status(500).json({error: "Internal server error"});
